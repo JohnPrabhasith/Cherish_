@@ -1,52 +1,31 @@
 import speech_recognition as sr
 import webbrowser as wb
-import pyttsx3 #Text to Speech
+import pyttsx3 
 import Music_Library as ml
+import gemini as gm
+import newsapi as news
 import requests
-from g4f.client import Client
-from gtts import gTTS
-import pygame
-import os
+import google.generativeai as genai
 import warnings
 warnings.filterwarnings("ignore")
 
+
 r = sr.Recognizer()
 engine = pyttsx3.init() #Creating an object of pyttsx3 Engine  for Text to Speech
-newsapi = "882e0a9d210647d095ded2555cbe5e37"
+newsapi = news.newsAPi
 engine.setProperty('rate', 150) #Speed of Speech
 
 
-def old_speak(text):
+def speak(text):
     engine.say(text)
     engine.runAndWait()
 
-def speak(text):
-    tts = gTTS(text=text, lang='en')
-    tts.save("audio.mp3")
-    pygame.mixer.init()
-    pygame.mixer.music.load("audio.mp3")
-    pygame.mixer.music.play()
-    while pygame.mixer.music.get_busy():
-        pygame.time.Clock().tick(10)
-    pygame.mixer.music.unload()
-    os.remove("audio.mp3")
-
 
 def AIProcess(command):
-    client = Client()
-    response = client.chat.completions.create(
-        model="gemini",
-        messages=[{
-                "role": "system",
-                "content": "You are a Virtual Assistant named sunday .You are Like google Assitant."
-            },
-            {
-                "role": "user",
-                "content": command
-            }],
-    )
-    json_response = response.to_json()
-    return json_response['choices'][0]['message']['content']
+    genai.configure(api_key=gm.google_genAi_APi)
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    response = model.generate_content(command)
+    return response.text
 
 def processCommand(c):
     if "open google" in c.lower():
